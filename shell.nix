@@ -5,6 +5,8 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.hello
     pkgs.python38Full
+    pyyaml
+    pyparsing
     pandas
     jupyterlab
 
