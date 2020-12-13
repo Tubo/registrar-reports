@@ -1,8 +1,6 @@
 import pytest
 from parser import parse
 
-pytestmark = pytest.mark.skip("save for later")
-
 
 def test_midline():
     # Test studies without laterality
@@ -16,7 +14,7 @@ def test_midline():
     assert parse("T L SPINE SI JOINTS") == 3
 
 
-def test_laterality():
+def test_peripheral():
     # Test studies with laterality
     assert parse("R ELBOW") == 1
     assert parse("R THUMB") == 1
@@ -24,6 +22,7 @@ def test_laterality():
     assert parse("R FINGER") == 1
     assert parse("LEFT HAND") == 1
     assert parse("L TIB FIB") == 1
+    assert parse("L TIB & FIB") == 1
     assert parse("BILATERAL HIPS") == 2
     assert parse("BILATERAL SHOULDERS") == 2
     assert parse("R FOOT HEEL") == 2

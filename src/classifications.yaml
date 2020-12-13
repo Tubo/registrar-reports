@@ -1,4 +1,4 @@
-midline:
+midline_parts:
   - "FACIAL BONE"
   - "FACIAL BONES"
   - "MANDIBLE"
@@ -57,11 +57,11 @@ digit:
   - "TOE"
   - "TOES"
 
-joint:
+joints:
   - "AC"
   - "SC"
 
-unilateral:
+singular_parts:
   - "TMJ"
   - "TMJS"
   - "COCHLEAR IMPLANT"
@@ -72,8 +72,11 @@ unilateral:
   - "WRIST"
   - "HAND"
   - "FOREARM"
+  - "FOR"
   - "ELBOW"
+  - "RADIUS"
   - "HUMERUS"
+  - "HUM"
   - "ARM"
   - "SHOULDER"
   - "SCAPULA"
@@ -101,7 +104,7 @@ unilateral:
   - "HEEL"
   - "LOWER LIMB"
 
-bilateral:
+plural_parts:
   - "SINUSES"
   - "SCAPHOIDS"
   - "THUMBS"
@@ -126,13 +129,19 @@ bilateral:
   - "TOES"
   - "LOWER LIMBS"
 
-single:
+unilateral:
   - "L"
   - "LEFT"
   - "R"
   - "RIGHT"
 
-double:
+bilateral:
   - "BILAT"
   - "BILATERAL"
   - "BOTH"
+
+ignore:
+  - "AND"
+  - "O ARM"
+  - "X RAY"
+  - "LONG LEGS"
