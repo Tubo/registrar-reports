@@ -6,7 +6,7 @@ import numpy as np
 from src.parser import parse
 
 filename = sys.argv[1]
-outname = "output/ExamDataParsed_.csv"
+outname = "descriptor_parser/output/ExamDataParsed_.csv"
 
 data = pd.read_csv(filename)
 parts_sum = data["ce_description"].apply(parse)
