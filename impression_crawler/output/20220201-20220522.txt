@@ -1,0 +1,63 @@
+                                           modality
+user                             modality          
+Bukhari, Waleed (waleedb)        CT             367
+                                 US             101
+                                 MR              38
+                                 DX               7
+                                                  1
+Daneshmandi, Sina (sdaneshmandi) CT             187
+                                 US              82
+                                 MR               7
+                                 DX               1
+Fernando, Chris (CFernando)      CT              28
+                                 US               5
+                                 MR               1
+Ganly, Edward (EGanly)           CT             340
+                                 US              74
+                                 MR              35
+                                 DX               8
+                                 CR               1
+Ikink, Willem (WillemI)          CT              28
+                                 US              11
+                                 MR              10
+                                 DX               9
+                                 CR               3
+Kim, Connor (kck)                CT             161
+                                 US              50
+                                 MR               5
+Marais, Michelle (mmarais)       CT              23
+                                 US               9
+                                 DX               2
+Miller, Ingrid (ingridm1)        CT               3
+Onyango, Nicholas (NicholaO)     CT             144
+                                 US              30
+                                 MR               3
+Reeves, Samuel (swsr)            CT             219
+                                 US              23
+                                 MR               5
+                                 CR               1
+                                 DX               1
+Rusius, Benjamin (benjamir)      CT             260
+                                 US              38
+                                 DX               6
+                                 MR               6
+Shi, Tubo (TuboS)                CT             327
+                                 US              84
+                                 MR              21
+                                 DX               7
+                                                  1
+Steffens, Lotte (lsteffens)      CT             212
+                                 US              68
+                                 DX              11
+                                 MR               6
+                                 CR               3
+Vergeer, Aaron (ajv)             CT             327
+                                 US              62
+                                 MR               8
+                                 DX               2
+                                                  1
+                                 PX               1
+Yetton, Renee (ryetton)          CT             240
+                                 US              71
+                                 MR              31
+                                 DX               5
