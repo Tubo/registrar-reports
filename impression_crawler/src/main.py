@@ -2,6 +2,7 @@ import time
 import os
 from dotenv import load_dotenv
 from playwright.sync_api import Playwright, sync_playwright
+import pandas as pd
 
 load_dotenv()
 
@@ -9,10 +10,13 @@ USERNAME = os.getenv("LOGIN")
 PASSWORD = os.getenv("IVPW")
 CDHBPW = os.getenv("CDHBPW")
 
+SIGNIN_URL = "http://159.117.33.41/InteleBrowser/app"
+AUDIT_URL = "http://159.117.33.41/InteleBrowser/app?service=direct/1/AuditDetails/auditDetailsTable.customPaginationControlTop.nextPage"
+
 FRAME_TIMEOUT = 2 * 60 * 1000
 
 
-def run(playwright: Playwright) -> None:
+def run(playwright: Playwright, usernames, start, end) -> None:
     browser = playwright.chromium.launch(headless=False, slow_mo=50)
     context = browser.new_context(
         http_credentials={"username": USERNAME, "password": CDHBPW}
@@ -20,18 +24,34 @@ def run(playwright: Playwright) -> None:
 
     # Open InteleBrowser and log in
     page = context.new_page()
-    page.goto("http://159.117.33.41/InteleBrowser/app")
+    page.goto(SIGNIN_URL)
     log_in(page, USERNAME, PASSWORD)
-    page.frame(url="http://159.117.33.41/InteleBrowser/app?service=page/Menu").click(
-        "text=Audit Users"
-    )
+    page.goto(AUDIT_URL)
+
     # Start auditing
-    results = audit(page, "TuboS", "2021/02/23", "2022/02/27")
-    print("Final counts: ", len(results))
+    fn = (
+        f"impression_crawler/output/{start.replace('/', '')}-{end.replace('/', '')}.pkl"
+    )
+    prev_results = pd.read_pickle(fn)
+    results = [prev_results]
+    for username in usernames:
+        if username in " ".join(prev_results.user.unique()):
+            continue
+        rows = audit(page, username, start, end)
+        df = pd.DataFrame(rows)
+        results.append(df)
+    pd.concat(results).to_pickle(
+        f"impression_crawler/output/{start.replace('/', '')}-{end.replace('/', '')}.pkl"
+    )
 
     # Shutdown
     context.close()
     browser.close()
+
+
+def load_usernames(path):
+    users = pd.read_csv(path, comment="#")
+    return users
 
 
 def log_in(page, username, password):
@@ -50,10 +70,11 @@ def audit(page, username, start, end) -> list:
     fill_form(page, username, start, end)
 
     # Wait for load completion
-    while not user_table_loaded(page, username):
-        print("Query not loaded, wait for 1 second")
+    wait = 10
+    while not user_table_loaded(page, username) and wait:
+        print(f"Results for {username} not loaded, wait for 1 second")
         time.sleep(1)
-
+        wait -= 1
     print("First page loaded")
 
     # Parse the first page
@@ -61,12 +82,9 @@ def audit(page, username, start, end) -> list:
     results.extend(parse_table(page))
 
     # Parse the subsequent pages
-    nextPage_button = page.frame(name="Main").locator(".tablecontrol a[name=nextPage]")
+    nextPage_button = page.locator(".tablecontrol a[name=nextPage]")
     while nextPage_button.count() > 0:
-        nextPage_button.first.click()
-        page.frame(name="Main").wait_for_load_state(
-            state="networkidle", timeout=FRAME_TIMEOUT
-        )
+        page.goto(AUDIT_URL)
         page_result = parse_table(page)
         results.extend(page_result)
     return results
@@ -74,41 +92,45 @@ def audit(page, username, start, end) -> list:
 
 def fill_form(page, username, start, end):
     # Fill input[name="usernameFilter"]
-    page.frame(name="Main").fill('input[name="usernameFilter"]', username)
+    page.fill('input[name="usernameFilter"]', username)
     # Click text=Add Emergency Impression
-    page.frame(name="Main").click("text=Add Emergency Impression")
+    page.check("text=Add Emergency Impression")
     # Select custom date
-    page.frame(name="Main").select_option(
-        'select[name="\\$PropertySelection\\$0"]', "defineCustomDates"
-    )
+    page.select_option('select[name="\\$PropertySelection\\$0"]', "defineCustomDates")
     # Fill text=From To >> input[type="text"]
-    page.frame(name="Main").fill('text=From To >> input[type="text"]', start)
+    page.fill('text=From To >> input[type="text"]', start)
     # Fill #toDateField
-    page.frame(name="Main").fill("#toDateField", end)
+    page.fill("#toDateField", end)
     # Click text=OK
-    page.frame(name="Main").click("text=OK")
+    page.click("text=OK")
     # Select 1000 per page: option '4' for 1000
-    page.frame(name="Main").select_option('select[name="pageSizeSelect"]', "2")
+    # page.select_option('select[name="pageSizeSelect"]', "2")
     # Click text=Update
-    page.frame(name="Main").click("text=Update")
+    page.click("input.button.updateButton")
 
 
 def user_table_loaded(page, username) -> bool:
-    row_match_user = [username in row.get("user") for row in parse_table(page)]
-    print("Check loading:", row_match_user)
-    return all(row_match_user)
+    parsed_table = parse_table(page)
+    if parsed_table:
+        row_match_user = [username in row.get("user") for row in parsed_table]
+        print("Check loading for ", username, ":", all(row_match_user))
+        return all(row_match_user)
+    return False
 
 
 def parse_table(page) -> list:
-    rows = page.frame(name="Main").locator(
-        "table#searchResultsMainTable > tbody > tr.even, table#searchResultsMainTable > tbody > tr.odd"
+    rows = page.locator(
+        "table#searchResultsMainTable > tbody > tr.even, table#searchResultsMainTable > tbody > tr.odd",
+        has_text="Impression",
     )
-    count = rows.count()
+    content = rows.all_inner_texts()
+    count = len(content)
     print(f"Page has {count} entries... starting parsing now")
     results = []
-    for i in range(count):
-        row = rows.nth(i).locator(f"td.tableValues").all_text_contents()
-        if parsed_row := parse_row(row):
+    for row in content:
+        items = row.split("\t")
+        items = [item.strip() for item in items]
+        if parsed_row := parse_row(items):
             results.append(parsed_row)
     return results
 
@@ -116,12 +138,17 @@ def parse_table(page) -> list:
 def parse_row(row) -> dict:
     if row:
         return {
-            "datetime": row[0].split(),
-            "user": row[1],
-            "modality": row[6],
-            "descriptor": row[7].strip(),
+            "date": row[0],
+            "time": row[1],
+            "user": row[2],
+            "modality": row[7],
+            "descriptor": row[8],
         }
 
 
-with sync_playwright() as playwright:
-    run(playwright)
+if __name__ == "__main__":
+    start = "2022/02/01"
+    end = "2022/05/22"
+    usernames = load_usernames("./username_mapping.csv").username
+    with sync_playwright() as playwright:
+        run(playwright, usernames, start, end)
