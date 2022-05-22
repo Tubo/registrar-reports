@@ -5,15 +5,18 @@ from playwright.sync_api import Playwright, sync_playwright
 
 load_dotenv()
 
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
+USERNAME = os.getenv("LOGIN")
+PASSWORD = os.getenv("IVPW")
+CDHBPW = os.getenv("CDHBPW")
 
 FRAME_TIMEOUT = 2 * 60 * 1000
 
 
 def run(playwright: Playwright) -> None:
-    browser = playwright.chromium.launch(headless=True, slow_mo=50)
-    context = browser.new_context()
+    browser = playwright.chromium.launch(headless=False, slow_mo=50)
+    context = browser.new_context(
+        http_credentials={"username": USERNAME, "password": CDHBPW}
+    )
 
     # Open InteleBrowser and log in
     page = context.new_page()
