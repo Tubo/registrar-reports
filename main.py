@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 
-from src.parser import parse
+from descriptor_parser.src.parser import parse
 
 filename = sys.argv[1]
 outname = "descriptor_parser/output/ExamDataParsed_.csv"

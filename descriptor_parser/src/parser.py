@@ -1,15 +1,14 @@
 import re
+import pathlib
 from functools import lru_cache
 from yaml import CLoader, load
 
 from pyparsing import Group, Literal, OneOrMore, Or, FollowedBy, Keyword, Optional, Dict
 
+class_file = pathlib.Path(__file__).parent / "classifications.yaml"
 
-with open("src/classifications.yaml") as f:
+with class_file.open() as f:
     classifications = load(f, Loader=CLoader)
-
-with open("ce_descriptions.txt") as f:
-    ce_descriptions = f.read()
 
 
 def clean(s):
