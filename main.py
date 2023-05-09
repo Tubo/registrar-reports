@@ -1,16 +1,20 @@
 import re
-import sys, argparse, pathlib
+from datetime import datetime
+import sys, argparse, pathlib, os
 import pandas as pd
 import numpy as np
+from dotenv import dotenv_values
 
-from src.parts_parser import parse as parse_bodyparts
+from registrar_reports import *
 
 
 def parse_ris(args):
     inputname = args.input
-    outname = "output/ris_count/ExamDataParsed_.csv"
+    output_suffix = input("What is the date range of the parsed data: ")
+    outname = f"output/ris_count/ExamDataParsed_{output_suffix}.csv"
 
     data = pd.read_csv(inputname)
+    data.dropna(how="all", inplace=True)  # remove empty rows
     parts_sum = data["ce_description"].apply(parse_bodyparts)
     parsed = pd.concat([data, parts_sum.rename("parts_sum")], axis=1)
     result = pd.concat([data, parsed.parts_sum.rename("parts_sum")], axis=1)
@@ -18,7 +22,13 @@ def parse_ris(args):
 
 
 def crawl_impressions(args):
-    print("crawling")
+    users = pd.read_excel("Impressions.xlsx")
+    config = dotenv_values()
+    output = f"output/impression_count/{datetime.now().strftime('%Y-%m-%dT%H%M%S')}.txt"
+
+    df = IVCrawler(config, users).start()
+    summary = df.groupby("user").modality.value_counts()
+    pd.DataFrame(summary).to_string(output)
 
 
 parser = argparse.ArgumentParser(prog="Registrar Reporting Numbers Utility")
@@ -28,19 +38,11 @@ subparsers = parser.add_subparsers(
 
 parser_a = subparsers.add_parser("parse")
 parser_a.set_defaults(func=parse_ris)
-parser_a.add_argument("--input")
+parser_a.add_argument("-f")
 
 parser_b = subparsers.add_parser("crawl")
 parser_b.set_defaults(func=crawl_impressions)
-parser_b.add_argument("--start")
-parser_b.add_argument("--finish")
-parser_b.add_argument("--names")
 
 args = parser.parse_args()
 
 args.func(args)
-
-
-""" filename = sys.argv[1]
-
-"""

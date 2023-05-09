@@ -5,10 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Crawl",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "main.py",
+            "args": ["crawl"],
             "console": "integratedTerminal",
             "justMyCode": true
         }
