@@ -24,9 +24,11 @@ def parse_ris(args):
 def crawl_impressions(args):
     users = pd.read_excel("Impressions.xlsx")
     config = dotenv_values()
-    output = f"output/impression_count/{datetime.now().strftime('%Y-%m-%dT%H%M%S')}.txt"
+    output_fn = datetime.now().strftime("%Y-%m-%dT%H%M%S")
+    output = f"output/impression_count/{output_fn}.txt"
 
     df = IVCrawler(config, users).start()
+    # df.to_pickle(f"notebooks/{output_fn}.pkl")
     summary = df.groupby("user").modality.value_counts()
     pd.DataFrame(summary).to_string(output)
 
