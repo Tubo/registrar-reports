@@ -47,6 +47,9 @@ class IVCrawler:
         if cache := self.retrieve_cache(username, start, end):
             return cache
 
+        print("Current user: ", username, end="\n\n")
+        print("Date range: ", start, " - ", end, end="\n\n")
+        print("Retrieving the first page")
         response = self.session.post(
             f"{self.base_url}/app",
             data={
@@ -62,14 +65,19 @@ class IVCrawler:
                 "$Submit": "Update",
             },
         )
+        print("Success")
+
         result = [response.content]
 
         while has_next_page(response.content):
+            print("Retrieving the next page..")
             response = self.session.get(
                 f"{self.base_url}/app?service=direct/1/AuditDetails/auditDetailsTable.customPaginationControlTop.nextPage"
             )
+            print("Success")
             result.append(response.content)
 
+        print("A total of ", len(result), " retrieved", end="\n\n")
         result = parse_pages(result)
         self.save_cache(result)
         return result
