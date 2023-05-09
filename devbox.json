@@ -1,9 +1,16 @@
 {
   "packages": [
     "python3",
-    "poetry",
     "python3Packages.numpy",
-    "python3Packages.pandas"
+    "python3Packages.pandas",
+    "python3Packages.requests",
+    "python310Packages.pip",
+    "python310Packages.python-dotenv",
+    "python310Packages.pytest",
+    "python310Packages.pyparsing",
+    "python310Packages.pyyaml",
+    "python310Packages.jupyterlab",
+    "python310Packages.requests"
   ],
   "shell": {
     "init_hook": null
