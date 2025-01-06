@@ -3,6 +3,10 @@ __pycache__/
 .mypy_cache/
 .ipynb_checkpoints/
 .env
-input
-output
+.venv
+
+input/
+output/
+
 *.pkl
+.DS_Store

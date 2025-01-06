@@ -7,5 +7,6 @@
         "registrar_reports"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "nixEnvSelector.suggestion": false
 }
