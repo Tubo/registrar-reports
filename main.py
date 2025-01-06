@@ -1,8 +1,12 @@
+import argparse
+import os
+import pathlib
 import re
+import sys
 from datetime import datetime
-import sys, argparse, pathlib, os
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 from dotenv import dotenv_values
 
 from registrar_reports import *
@@ -10,7 +14,9 @@ from registrar_reports import *
 
 def parse_ris(args):
     inputname = args.input
-    output_suffix = input("What is the date range of the parsed data: ")
+    output_suffix = input(
+        "To help name the output file, what is the date range of the parsed data (YYYYMMDD-YYYMMDD):\n"
+    )
     outname = f"output/ris_count/ExamDataParsed_{output_suffix}.csv"
 
     data = pd.read_csv(inputname)
@@ -24,13 +30,15 @@ def parse_ris(args):
 def crawl_impressions(args):
     users = pd.read_excel("Impressions.xlsx")
     config = dotenv_values()
-    output_fn = datetime.now().strftime("%Y-%m-%dT%H%M%S")
-    output = f"output/impression_count/{output_fn}.txt"
+    output_dir = "output/impression_count/"
+    raw_file = output_dir + "raw.csv"
+    output_fn = output_dir + f"{datetime.now().strftime("%Y-%m-%dT%H%M%S")}.csv"
 
-    df = IVCrawler(config, users).start()
-    # df.to_pickle(f"notebooks/{output_fn}.pkl")
-    summary = df.groupby("user").modality.value_counts()
-    pd.DataFrame(summary).to_string(output)
+    # df = InteleBrowserCrawler(config, users).run()
+    # df.to_csv(raw_file)
+    df = pd.read_csv(raw_file)
+    result = analyse(df)
+    result.to_csv(output_fn)
 
 
 parser = argparse.ArgumentParser(prog="Registrar Reporting Numbers Utility")
@@ -40,7 +48,7 @@ subparsers = parser.add_subparsers(
 
 parser_a = subparsers.add_parser("parse")
 parser_a.set_defaults(func=parse_ris)
-parser_a.add_argument("-f")
+parser_a.add_argument("-f", dest="input")
 
 parser_b = subparsers.add_parser("crawl")
 parser_b.set_defaults(func=crawl_impressions)

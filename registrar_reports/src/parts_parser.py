@@ -1,9 +1,9 @@
-import re
 import pathlib
+import re
 from functools import lru_cache
-from yaml import CLoader, load
 
-from pyparsing import Group, Literal, OneOrMore, Or, FollowedBy, Keyword, Optional, Dict
+from pyparsing import Dict, FollowedBy, Group, Keyword, Literal, OneOrMore, Optional, Or
+from yaml import CLoader, load
 
 class_file = pathlib.Path(__file__).parent / "classifications.yaml"
 
@@ -11,8 +11,12 @@ with class_file.open() as f:
     classifications = load(f, Loader=CLoader)
 
 
+# Pre-compile the regular expression for better performance
+CLEAN_RE = re.compile(r"[^\w\s_]")
+
+
 def clean(s):
-    spaced = re.sub(r"[^\w\s_]", " ", s).split()
+    spaced = CLEAN_RE.sub(" ", s).split()
     return " ".join(spaced)
 
 
@@ -83,6 +87,12 @@ def calculate(list_of_parts):
     return sum(sum(i) for i in list_of_parts)
 
 
-@lru_cache(maxsize=64)
+LOOKUP_TABLE = {}
+
+
 def parse(text):
-    return calculate(split(text))
+    if text in LOOKUP_TABLE:
+        return LOOKUP_TABLE[text]
+    count = calculate(split(text))
+    LOOKUP_TABLE[text] = count
+    return count

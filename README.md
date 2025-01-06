@@ -1,5 +1,10 @@
 # Registrar reporting numbers
 
+## 0. Set up
+> pip install -r requirements.txt
+
+Fill in personal details in the .env file
+
 ## 1. Parse body parts
 
 > python main.py parse -f <file>
