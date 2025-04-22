@@ -4,6 +4,7 @@ import pathlib
 import re
 import sys
 from datetime import datetime
+import getpass
 
 import numpy as np
 import pandas as pd
@@ -27,15 +28,40 @@ def parse_ris(args):
     result.to_csv(outname)
 
 
+def get_credentials(config):
+    """Get credentials from config or prompt user if empty"""
+    credentials = {}
+    field_prompts = {
+        "LOGIN": "Inteleviewer Username",
+        "IVPW": "Inteleviewer Password",
+        "CDHBPW": "Single Sign-On Password",
+        "IB_URL": "InteleBrowser URL"
+    }
+    
+    for field, prompt in field_prompts.items():
+        if field not in config or not config[field]:
+            if field in ["IVPW", "CDHBPW"]:
+                # Use getpass for passwords to hide input
+                credentials[field] = getpass.getpass(f"Please enter your {prompt}: ")
+            else:
+                credentials[field] = input(f"Please enter your {prompt}: ")
+        else:
+            credentials[field] = config[field]
+    
+    return credentials
+
+
 def crawl_impressions(args):
     users = pd.read_excel("Impressions.xlsx")
     config = dotenv_values()
+    credentials = get_credentials(config)
+    
     output_dir = "output/impression_count/"
     raw_file = output_dir + "raw.csv"
     output_fn = output_dir + f"{datetime.now().strftime("%Y-%m-%dT%H%M%S")}.csv"
 
-    # df = InteleBrowserCrawler(config, users).run()
-    # df.to_csv(raw_file)
+    df = InteleBrowserCrawler(credentials, users).run()
+    df.to_csv(raw_file)
     df = pd.read_csv(raw_file)
     result = analyse(df)
     result.to_csv(output_fn)
